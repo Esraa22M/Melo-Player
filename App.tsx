@@ -1,6 +1,5 @@
 import { StyleSheet, Text, SafeAreaView } from 'react-native';
-import Test from './src/components/Test';
-
+import colors from '@/utils/colors';
 function App() {
   return <AppContent />;
 }
