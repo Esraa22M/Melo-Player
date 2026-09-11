@@ -8,16 +8,24 @@ import {
   ViewStyle,
 } from 'react-native';
 import { useFormikContext } from 'formik';
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import AppInput from '@/ui/AppInput';
 import colors from '@/utils/colors';
+import { TextInputProps } from 'react-native';
 
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 interface Props {
   name: string;
   placeholder?: string;
   label?: string;
   keyboardType?: KeyboardTypeOptions | undefined;
-  autoCapitalize?: AutoCapitalize | undefined;
+  autoCapitalize?: TextInputProps['autoCapitalize'] | undefined;
   secureTextEntry?: boolean | undefined;
   containerStyle?: StyleProp<ViewStyle>;
 }
@@ -37,8 +45,26 @@ const AuthInput: FC<Props> = props => {
     name,
   } = props;
   const errorMg = touched[name] && errors[name] ? errors[name] : undefined;
+  const inputTransformValue = useSharedValue(0);
+  const shakeUi = () => {
+    inputTransformValue.value = withSequence(
+      withTiming(-10, { duration: 50 }),
+      withSpring(0, {
+        damping: 10,
+        mass: 0.5,
+        stiffness: 300,
+        energyThreshold: 0.01,
+      }),
+    );
+  };
+  const inputStyle = useAnimatedStyle(() => {
+    return { transform: [{ translateX: inputTransformValue.value }] };
+  });
+  useEffect(() => {
+    if (errorMg) shakeUi();
+  }, [errorMg]);
   return (
-    <View style={[styles.container, containerStyle]}>
+    <Animated.View style={[containerStyle, inputStyle]}>
       <View style={styles.labelContainer}>
         <Text style={styles.label}>{label}</Text>
         <Text style={styles.errorMsg}>{errorMg}</Text>
@@ -52,12 +78,11 @@ const AuthInput: FC<Props> = props => {
         value={values[name]}
         onBlur={handleBlur(name)}
       />
-    </View>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {},
   labelContainer: {
     flexDirection: 'row',
     alignItems: 'center',

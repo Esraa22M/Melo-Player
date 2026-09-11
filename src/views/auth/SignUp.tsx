@@ -66,6 +66,7 @@ const SignUp: FC<Props> = props => {
             placeholder="********"
             secureTextEntry
             name={'password'}
+            containerStyle={styles.marginBottom}
           />
           <SubmitButton title="Sign Up" />
         </View>
